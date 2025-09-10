@@ -28,7 +28,7 @@ export default function HomePage() {
       {/* Upload Section */}
       <div className="max-w-2xl mx-auto bg-white rounded-3xl p-10 flex flex-col items-center space-y-6 shadow-2xl">
         <h1 className="text-4xl font-extrabold text-gray-900 text-center">
-          CSV Manager
+          Tabula CSV viewer
         </h1>
         <p className="text-gray-500 text-center">
           Upload your CSV files and manage them effortlessly.
