@@ -11,7 +11,8 @@ export default function HomePage() {
   const fetchFiles = () => {
     const keys = Object.keys(localStorage)
       .filter((key) => key.startsWith('csv-'))
-      .map((key) => key.replace('csv-', ''));
+      // decode for display
+      .map((key) => decodeURIComponent(key.replace('csv-', '')));
     setFiles(keys);
   };
 
@@ -23,7 +24,6 @@ export default function HomePage() {
   }, []);
 
   return (
-    // <div className="min-h-screen bg-gray-50 p-6"></div>
     <div className="min-h-screen p-6 bg-transparent">
       {/* Upload Section */}
       <div className="max-w-2xl mx-auto bg-white rounded-3xl p-10 flex flex-col items-center space-y-6 shadow-2xl">
@@ -46,7 +46,7 @@ export default function HomePage() {
           files.map((file) => (
             <div
               key={file}
-              onClick={() => router.push(`/files/${file}`)}
+              onClick={() => router.push(`/files/${encodeURIComponent(file)}`)}
               className="cursor-pointer bg-white rounded-3xl shadow-lg p-6 flex flex-col justify-between transition-transform transform hover:scale-105 hover:shadow-2xl"
             >
               <h3 className="text-2xl font-semibold text-gray-900 truncate">
@@ -58,7 +58,8 @@ export default function HomePage() {
                   onClick={(e) => {
                     e.stopPropagation();
                     if (confirm(`Delete "${file}"?`)) {
-                      localStorage.removeItem(`csv-${file}`);
+                      // encode to match localStorage key
+                      localStorage.removeItem(`csv-${encodeURIComponent(file)}`);
                       window.dispatchEvent(new Event('csv-update'));
                     }
                   }}

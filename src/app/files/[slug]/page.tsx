@@ -5,12 +5,13 @@ import { useParams } from 'next/navigation';
 
 export default function CSVPage() {
   const params = useParams();
-  const slug = Array.isArray(params?.slug) ? params.slug[0] : params?.slug || '';
+  const rawSlug = Array.isArray(params?.slug) ? params.slug[0] : params?.slug || '';
+  const slug = decodeURIComponent(rawSlug);
   const [data, setData] = useState<Record<string, any>[]>([]);
 
   const fetchData = () => {
     if (slug) {
-      const saved = localStorage.getItem(`csv-${encodeURIComponent(slug)}`);
+      const saved = localStorage.getItem(`csv-${rawSlug}`);
       setData(saved ? JSON.parse(saved) : []);
     }
   };
