@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+:root {
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground: #ededed;
+  }
+}
+
+body {
+  @apply bg-gray-50 text-[--foreground] font-sans;
+  min-height: 100vh;
+  margin: 0;
+}
+
