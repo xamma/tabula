@@ -8,3 +8,7 @@ You can switch between your CSVs in the header as you wish.
 
 ### Enjoy a view on your data directly rendered in your browser
 ![alt text](./assets/image2.png)
+
+### You can also put CSVfiles under /public/csv to render them on server
+
+![alt text](./assets/image3.png)

@@ -9,11 +9,34 @@ export default function CSVPage() {
   const slug = decodeURIComponent(rawSlug);
   const [data, setData] = useState<Record<string, any>[]>([]);
 
-  const fetchData = () => {
-    if (slug) {
-      const saved = localStorage.getItem(`csv-${rawSlug}`);
-      setData(saved ? JSON.parse(saved) : []);
+  const fetchData = async () => {
+    let parsed: Record<string, any>[] = [];
+
+    const saved = localStorage.getItem(`csv-${encodeURIComponent(slug)}`);
+    if (saved) {
+      parsed = JSON.parse(saved);
+    } else {
+      // Try fetching from /public/csv/
+      try {
+        // Build safe URL
+        const fileName = slug.endsWith('.csv') ? slug : `${slug}.csv`;
+        const safeUrl = `/csv/${encodeURIComponent(fileName)}`;
+
+        const res = await fetch(safeUrl);
+        if (res.ok) {
+          const text = await res.text();
+          const Papa = (await import('papaparse')).default;
+          const result = Papa.parse(text, { header: true, skipEmptyLines: true });
+          parsed = result.data as Record<string, any>[];
+        } else {
+          console.warn(`CSV not found at ${safeUrl}`);
+        }
+      } catch (err) {
+        console.error('Error fetching public CSV:', err);
+      }
     }
+
+    setData(parsed);
   };
 
   useEffect(() => {
@@ -56,7 +79,10 @@ export default function CSVPage() {
                 className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
               >
                 {Object.values(row).map((value, i) => (
-                  <td key={i} className="px-6 py-4 text-gray-800 dark:text-gray-200 whitespace-nowrap">
+                  <td
+                    key={i}
+                    className="px-6 py-4 text-gray-800 dark:text-gray-200 whitespace-nowrap"
+                  >
                     {value as string | number}
                   </td>
                 ))}

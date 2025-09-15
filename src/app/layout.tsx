@@ -3,7 +3,7 @@ import Header from '../components/Header';
 import { ReactNode } from 'react';
 
 export const metadata = {
-  title: 'CSV Manager',
+  title: 'Tabula',
   description: 'Upload, view, and manage your CSV files with style',
 };
 
