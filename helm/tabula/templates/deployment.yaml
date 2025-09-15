@@ -18,13 +18,19 @@ spec:
       {{- include "tabula.selectorLabels" . | nindent 8 }}
     spec:
       containers:
-      - env:
-        - name: KUBERNETES_CLUSTER_DOMAIN
-          value: {{ quote .Values.kubernetesClusterDomain }}
-        image: {{ .Values.depl.tabula.image.repository }}:{{ .Values.depl.tabula.image.tag
-          | default .Chart.AppVersion }}
-        imagePullPolicy: {{ .Values.depl.tabula.imagePullPolicy }}
-        name: tabula
-        ports:
-        - containerPort: 5000
-        resources: {}
+        - name: tabula
+          image: {{ .Values.depl.tabula.image.repository }}:{{ .Values.depl.tabula.image.tag | default .Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.depl.tabula.imagePullPolicy }}
+          env:
+            - name: KUBERNETES_CLUSTER_DOMAIN
+              value: {{ quote .Values.kubernetesClusterDomain }}
+          ports:
+            - containerPort: 3000
+          volumeMounts:
+            - name: default-csvs
+              mountPath: /app/public/csv
+
+      volumes:
+        - name: default-csvs
+          configMap:
+            name: {{ $.Release.Name }}-csv-defaults

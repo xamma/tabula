@@ -37,3 +37,17 @@ ingress:
     - secretName: tabula-tls
       hosts:
         - tabula.xammaops.win
+
+csv:
+  enabled: true
+  pvcName: tabula-csv-pvc
+  mountPath: /app/public/csv
+  defaults:
+    - name: sample.csv
+      content: |
+        col1,col2
+        a,b
+    - name: example.csv
+      content: |
+        foo,bar
+        123,456

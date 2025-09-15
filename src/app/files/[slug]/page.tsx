@@ -20,7 +20,7 @@ export default function CSVPage() {
       try {
         // Build safe URL
         const fileName = slug.endsWith('.csv') ? slug : `${slug}.csv`;
-        const safeUrl = `/csv/${encodeURIComponent(fileName)}`;
+        const safeUrl = `/api/csv/${encodeURIComponent(fileName)}`;
 
         const res = await fetch(safeUrl);
         if (res.ok) {
