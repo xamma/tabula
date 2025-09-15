@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $.Release.Name }}-depl
+  labels:
+    app: tabula-depl
+  {{- include "tabula.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.depl.replicas }}
+  selector:
+    matchLabels:
+      app: tabula-depl
+    {{- include "tabula.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: tabula-depl
+      {{- include "tabula.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - env:
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        image: {{ .Values.depl.tabula.image.repository }}:{{ .Values.depl.tabula.image.tag
+          | default .Chart.AppVersion }}
+        imagePullPolicy: {{ .Values.depl.tabula.imagePullPolicy }}
+        name: tabula
+        ports:
+        - containerPort: 5000
+        resources: {}
