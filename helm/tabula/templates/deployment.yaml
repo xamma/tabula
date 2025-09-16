@@ -31,6 +31,11 @@ spec:
               mountPath: {{ .Values.csv.mountPath }}
 
       volumes:
+        {{- if .Values.csv.enabled }}
         - name: csv-files
           configMap:
             name: {{ $.Release.Name }}-csv-defaults
+        {{- else }}
+        - name: csv-files
+          emptyDir: {}
+        {{- end }}
