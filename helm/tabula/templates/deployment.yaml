@@ -17,6 +17,19 @@ spec:
         app: tabula-depl
       {{- include "tabula.selectorLabels" . | nindent 8 }}
     spec:
+      # Init container to copy ConfigMap files into a real directory
+      initContainers:
+        - name: copy-csvs
+          image: busybox:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            - cp -L /configmap-csv/* /data/csv/; chmod -R 755 /data/csv
+          volumeMounts:
+            - name: configmap-csv
+              mountPath: /configmap-csv
+            - name: csv-files
+              mountPath: /data/csv
+
       containers:
         - name: tabula
           image: {{ .Values.depl.tabula.image.repository }}:{{ .Values.depl.tabula.image.tag | default .Chart.AppVersion }}
@@ -31,6 +44,11 @@ spec:
               mountPath: {{ .Values.csv.mountPath }}
 
       volumes:
-        - name: csv-files
+        # ConfigMap containing CSVs
+        - name: configmap-csv
           configMap:
             name: {{ $.Release.Name }}-csv-defaults
+
+        # Writable scratch space for initContainer
+        - name: csv-files
+          emptyDir: {}
