@@ -40,7 +40,6 @@ ingress:
 
 csv:
   enabled: true
-  pvcName: tabula-csv-pvc
   mountPath: /app/data/csv
   defaults:
     - name: sample.csv
