@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import fs from "fs/promises";
+import path from "path";
 
 const CSV_DIRS = [
-  "/data/csv",       // mounted via ConfigMap
-  "public/csv",      // public CSVs
-  "src/data/csv",    // local dev CSVs
+  path.join(process.cwd(), "public/csv"),  // public CSVs
+  path.join(process.cwd(), "src/data/csv"), // dev CSVs
+  "/data/csv",                              // mounted via ConfigMap
 ];
 
 export async function GET() {
@@ -18,8 +19,9 @@ export async function GET() {
           files.push({ name: file });
         }
       }
-    } catch {
+    } catch (err: unknown) {
       // ignore missing dirs
+      console.warn(`Could not read dir ${dir}:`, String(err));
     }
   }
 
