@@ -5,7 +5,7 @@ import path from "path";
 const CSV_DIRS = [
   path.join(process.cwd(), "public/csv"),  // public CSVs
   path.join(process.cwd(), "src/data/csv"), // dev CSVs
-  "app/data/csv",                              // mounted via ConfigMap
+  "/app/data/csv",                              // mounted via ConfigMap
 ];
 
 export async function GET() {
