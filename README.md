@@ -14,12 +14,13 @@ You can switch between your CSVs in the header as you wish.
 ![alt text](./assets/image3.png)
 
 ### Add CSV files via a configmap (K8s)
-Use the helm values to create the configmap:
+Or, use the data dir **/data/csv/** to mount csvs to the app.  
+Use these helm values to create the configmap:
 ```yaml
 csv:
   enabled: true
   pvcName: tabula-csv-pvc
-  mountPath: /app/public/csv
+  mountPath: /app/data/csv
   defaults:
     - name: sample.csv
       content: |

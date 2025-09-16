@@ -28,7 +28,7 @@ spec:
             - containerPort: 3000
           volumeMounts:
             - name: csv-files
-              mountPath: /data/csv
+              mountPath: {{ .Values.csv.mountPath }}
 
       volumes:
         - name: csv-files

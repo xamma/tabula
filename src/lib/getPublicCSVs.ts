@@ -2,14 +2,23 @@ import fs from "fs";
 import path from "path";
 
 export function getPublicCSVs() {
-  const csvDir = path.join(process.cwd(), "public", "csv");
-  if (!fs.existsSync(csvDir)) return [];
+  const dirs = [
+    path.join(process.cwd(), "public", "csv"),
+    path.join(process.cwd(), "src", "data", "csv"),
+    "/data/csv", // only works if running in container
+  ];
 
-  return fs
-    .readdirSync(csvDir)
-    .filter((file) => file.endsWith(".csv"))
-    .map((file) => ({
-      name: file,
-      url: `/csv/${file}`,
-    }));
+  const files: { name: string; url: string }[] = [];
+
+  for (const dir of dirs) {
+    if (!fs.existsSync(dir)) continue;
+
+    for (const file of fs.readdirSync(dir)) {
+      if (file.endsWith(".csv")) {
+        files.push({ name: file, url: `/files/${file}` });
+      }
+    }
+  }
+
+  return files;
 }
