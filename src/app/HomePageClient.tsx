@@ -4,36 +4,46 @@ import CSVUploader from '../components/CSVUploader';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-type HomePageClientProps = {
-  publicCSVs: { name: string; url: string }[];
-};
-
-export default function HomePageClient({ publicCSVs }: HomePageClientProps) {
-  const [files, setFiles] = useState<string[]>([]);
+export default function HomePageClient() {
+  const [mountedCSVs, setMountedCSVs] = useState<{ name: string }[]>([]);
+  const [uploadedCSVs, setUploadedCSVs] = useState<string[]>([]);
   const router = useRouter();
 
-  const fetchFiles = () => {
+  // get uploaded CSVs from localStorage
+  const fetchUploadedCSVs = () => {
     const keys = Object.keys(localStorage)
       .filter((key) => key.startsWith('csv-'))
       .map((key) => decodeURIComponent(key.replace('csv-', '')));
-    setFiles(keys);
+    setUploadedCSVs(keys);
+  };
+
+  // get mounted CSVs from API
+  const fetchMountedCSVs = async () => {
+    try {
+      const res = await fetch('/api/csv/list');
+      const data = await res.json();
+      setMountedCSVs(data);
+    } catch {
+      setMountedCSVs([]);
+    }
   };
 
   useEffect(() => {
-    fetchFiles();
-    const listener = () => fetchFiles();
+    fetchUploadedCSVs();
+    fetchMountedCSVs();
+
+    const listener = () => fetchUploadedCSVs();
     window.addEventListener('csv-update', listener);
     return () => window.removeEventListener('csv-update', listener);
   }, []);
 
   const allFiles = [
-    ...publicCSVs.map((f) => ({ name: f.name, isPublic: true })),
-    ...files.map((name) => ({ name, isPublic: false })),
+    ...mountedCSVs.map((f) => ({ name: f.name, isPublic: true })),
+    ...uploadedCSVs.map((name) => ({ name, isPublic: false })),
   ];
 
   return (
     <div className="min-h-screen p-6 bg-transparent">
-      {/* Upload Section */}
       <div className="max-w-2xl mx-auto bg-white rounded-3xl p-10 flex flex-col items-center space-y-6 shadow-2xl">
         <h1 className="text-4xl font-extrabold text-gray-900 text-center">
           Tabula CSV viewer
@@ -44,7 +54,6 @@ export default function HomePageClient({ publicCSVs }: HomePageClientProps) {
         <CSVUploader />
       </div>
 
-      {/* CSV Cards */}
       <div className="mt-12 max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {allFiles.length === 0 ? (
           <p className="text-gray-500 col-span-full text-center mt-10 text-lg">
