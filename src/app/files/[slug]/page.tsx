@@ -2,37 +2,58 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import Papa from 'papaparse';
+
+type CSVRow = Record<string, string>;
 
 export default function CSVPage() {
   const params = useParams();
   const rawSlug = Array.isArray(params?.slug) ? params.slug[0] : params?.slug || '';
   const slug = decodeURIComponent(rawSlug);
-  const [data, setData] = useState<Record<string, any>[]>([]);
+  const [data, setData] = useState<CSVRow[]>([]);
 
   const fetchData = async () => {
-    let parsed: Record<string, any>[] = [];
+    let parsed: CSVRow[] = [];
 
     const saved = localStorage.getItem(`csv-${encodeURIComponent(slug)}`);
     if (saved) {
-      parsed = JSON.parse(saved);
+      parsed = JSON.parse(saved) as CSVRow[];
     } else {
-      // Try fetching from /public/csv/
       try {
-        // Build safe URL
         const fileName = slug.endsWith('.csv') ? slug : `${slug}.csv`;
-        const safeUrl = `/api/csv/${encodeURIComponent(fileName)}`;
+        const res = await fetch(`/api/csv/${encodeURIComponent(fileName)}`);
 
-        const res = await fetch(safeUrl);
         if (res.ok) {
           const text = await res.text();
-          const Papa = (await import('papaparse')).default;
-          const result = Papa.parse(text, { header: true, skipEmptyLines: true });
-          parsed = result.data as Record<string, any>[];
+
+          // try parsing with headers
+          let result = Papa.parse<CSVRow>(text, { header: true, skipEmptyLines: true });
+
+          // fallback to header: false
+          if (!result.data.length || Object.keys(result.data[0]).length === 0) {
+            const fallback = Papa.parse<string[]>(text, { header: false, skipEmptyLines: true });
+            if (fallback.data.length > 0) {
+              const headers = fallback.data[0].map((_, i) => `col${i + 1}`);
+              parsed = fallback.data.map((row) => {
+                const obj: CSVRow = {};
+                row.forEach((val, i) => {
+                  obj[headers[i]] = val.trim();
+                });
+                return obj;
+              });
+            }
+          } else {
+            parsed = result.data.map((row) =>
+              Object.fromEntries(
+                Object.entries(row).map(([k, v]) => [k.trim(), (v ?? '').toString().trim()])
+              )
+            );
+          }
         } else {
-          console.warn(`CSV not found at ${safeUrl}`);
+          console.warn(`CSV not found at /api/csv/${fileName}`);
         }
       } catch (err) {
-        console.error('Error fetching public CSV:', err);
+        console.error('Error fetching CSV:', err);
       }
     }
 
@@ -46,7 +67,7 @@ export default function CSVPage() {
     return () => window.removeEventListener('csv-update', listener);
   }, [slug]);
 
-  if (!data || data.length === 0) {
+  if (!data.length) {
     return (
       <div className="mt-20 text-center text-gray-500 dark:text-gray-400 text-xl">
         No data found for <span className="font-semibold">{slug}</span>
@@ -83,7 +104,7 @@ export default function CSVPage() {
                     key={i}
                     className="px-6 py-4 text-gray-800 dark:text-gray-200 whitespace-nowrap"
                   >
-                    {value as string | number}
+                    {value}
                   </td>
                 ))}
               </tr>
