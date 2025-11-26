@@ -38,6 +38,16 @@ ingress:
       hosts:
         - tabula.xammaops.win
 
+httproute:
+  enabled: true
+  parentRefs:
+    - name: "envoy-internal"
+      namespace: "networking"
+  hosts:
+    - host: tabula.xammaops.win
+      paths:
+        - /
+
 csv:
   enabled: true
   mountPath: /app/data/csv
